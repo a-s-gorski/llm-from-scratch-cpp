@@ -1,0 +1,6 @@
+if(ENABLE_TESTS)
+    enable_testing()
+    add_executable(test_main test_main.cpp)
+    target_link_libraries(test_main PRIVATE your_project_library)
+    add_test(NAME LibraryTest COMMAND test_main)
+endif()

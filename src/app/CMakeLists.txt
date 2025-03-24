@@ -1,0 +1,2 @@
+add_executable(your_project_app App.cpp)
+target_link_libraries(your_project_app PRIVATE your_project_library)

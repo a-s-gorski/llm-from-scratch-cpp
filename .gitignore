@@ -1,0 +1,38 @@
+# CMake build directories
+/build/
+# CLion specific directories
+.idea/
+cmake-build-debug
+# VS Code specific directories
+.vscode/
+${PROJECT_DIR}/
+# Generated CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+YourProjectTargets.cmake
+YourProjectConfig.cmake
+# Object files
+*.o
+# Binary files
+*.a
+*.so
+*.dylib
+*.dll
+# Executables
+your_project_app
+# Test binary
+test_main
+# Temporary files
+*.swp
+*.swo
+# macOS specific
+.DS_Store
+# Windows specific
+Thumbs.db
+desktop.ini
+# Logs
+*.log
+# Installation directory
+install/
