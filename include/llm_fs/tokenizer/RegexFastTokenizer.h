@@ -21,7 +21,7 @@ public:
 
     explicit RegexFastTokenizer(PatternType pattern_type);
 
-    void train(std::string text, unsigned int vocab_size, bool verbose = false) override;
+    void train(std::string text, unsigned int vocab_size) override;
 
 private:
     boost::regex pattern;

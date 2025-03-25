@@ -1,27 +1,18 @@
-cmake_minimum_required(VERSION 3.14)
-project(YourProject VERSION 1.0.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.10)
+project(llm_fs)
 
-# Set C++ standard
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+# Set the C++ standard
+set(CMAKE_CXX_STANDARD 17)
 
-find_package(Boost 1.70 REQUIRED COMPONENTS filesystem system)
-
-
-# Define project options
-include(cmake/options.cmake)
+# Include the "include" directory for headers
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 # Add subdirectories
-add_subdirectory(src)
-add_subdirectory(tests)
+add_subdirectory(src/lib)
+add_subdirectory(src/app)
 
-# Installation
-install(TARGETS your_project_library EXPORT YourProjectTargets
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-)
-install(DIRECTORY include/ DESTINATION include)
+# Create the executable (main program)
+add_executable(main src/main.cpp)
 
-# Export package
-export(EXPORT YourProjectTargets FILE YourProjectTargets.cmake)
+# Link the library (llm_fs_lib) to the main executable
+target_link_libraries(main PRIVATE llm_fs_lib)

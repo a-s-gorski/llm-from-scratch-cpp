@@ -1,2 +1,5 @@
-add_executable(your_project_app App.cpp)
-target_link_libraries(your_project_app PRIVATE your_project_library)
+# This executable is the application
+add_executable(app App.cpp)
+
+# Link the previously created library (llm_fs_lib) to the app
+target_link_libraries(app PRIVATE llm_fs_lib)

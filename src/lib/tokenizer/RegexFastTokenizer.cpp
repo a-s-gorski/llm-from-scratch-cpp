@@ -1,4 +1,4 @@
-#include "RegexFastTokenizer.h"
+#include "llm_fs/tokenizer/RegexFastTokenizer.h"
 
 RegexFastTokenizer::RegexFastTokenizer(PatternType pattern_type) : BaseTokenizer() {
     switch(pattern_type) {
@@ -15,7 +15,7 @@ RegexFastTokenizer::RegexFastTokenizer(PatternType pattern_type) : BaseTokenizer
 }
 
 
-void RegexFastTokenizer::train(std::string text, unsigned int vocab_size, bool verbose){
+void RegexFastTokenizer::train(std::string text, unsigned int vocab_size){
     this->vocab_size = vocab_size;
     auto id_list = presplit(text);
     

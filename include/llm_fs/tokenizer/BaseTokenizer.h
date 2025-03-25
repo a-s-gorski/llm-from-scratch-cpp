@@ -10,7 +10,7 @@
 
 class BaseTokenizer {
 public:
-  virtual void train(std::string text, unsigned int vocab_size, bool verbose = false)=0;
+  virtual void train(std::string text, unsigned int vocab_size)=0;
 
 
 protected:
