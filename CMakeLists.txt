@@ -5,6 +5,9 @@ project(YourProject VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+find_package(Boost 1.70 REQUIRED COMPONENTS filesystem system)
+
+
 # Define project options
 include(cmake/options.cmake)
 
