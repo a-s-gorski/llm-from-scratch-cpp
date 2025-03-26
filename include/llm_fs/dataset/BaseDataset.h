@@ -4,10 +4,17 @@
 #include <string>
 
 
-class BaseDataset {
-  public:
-    virtual std::string load_dataset() = 0;
-};
+    namespace llm_fs::dataset {
+        class BaseDataset {
+        public:
+            virtual ~BaseDataset() = default;
+
+            virtual std::string load_dataset() = 0;
+        };
+    }
+
+
+
 
 
 #endif //BASEDATASET_H

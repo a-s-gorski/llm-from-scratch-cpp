@@ -1,7 +1,8 @@
 add_library(llm_fs_lib STATIC
         dataset/TextDataset.cpp
         tokenizer/RegexFastTokenizer.cpp
+        tokenizer/trainer/Trainer.cpp
 )
 
-# Add include directories for the library to use the headers in the "include" folder
+# Make include/ available for both the library and other targets
 target_include_directories(llm_fs_lib PUBLIC ${CMAKE_SOURCE_DIR}/include)

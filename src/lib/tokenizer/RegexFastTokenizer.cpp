@@ -1,76 +1,123 @@
 #include "llm_fs/tokenizer/RegexFastTokenizer.h"
+#include "trainer/Trainer.h"
 
-RegexFastTokenizer::RegexFastTokenizer(PatternType pattern_type) : BaseTokenizer() {
-    switch(pattern_type) {
-        case PatternType::GPT2:
-            pattern = boost::regex(pattern_gpt2,
-                boost::regex_constants::icase | boost::regex_constants::optimize);
-        break;
-        case PatternType::GPT4:
-            default:
-                pattern = boost::regex(pattern_gpt4,
+namespace llm_fs::tokenizer {
+    RegexFastTokenizer::RegexFastTokenizer(PatternType pattern_type) : BaseTokenizer() {
+        switch(pattern_type) {
+            case PatternType::GPT2:
+                pattern = boost::regex(pattern_gpt2,
                     boost::regex_constants::icase | boost::regex_constants::optimize);
-        break;
+            break;
+            case PatternType::GPT4:
+                default:
+                    pattern = boost::regex(pattern_gpt4,
+                        boost::regex_constants::icase | boost::regex_constants::optimize);
+            break;
+        }
     }
-}
 
 
-void RegexFastTokenizer::train(std::string text, unsigned int vocab_size){
-    this->vocab_size = vocab_size;
-    auto id_list = presplit(text);
-    
 
-}
-
-std::vector<int32_t> RegexFastTokenizer::presplit(const std::string& text){
-    const std::vector<std::string>& text_chunks = generate_text_chunks(text);
-    const std::vector<uint8_t>& ids = generate_ids(text);
-    std::vector<int32_t> id_list = generate_ids_list(text);
-    size_t i = 0, j = 0;
-
-    for (const std::string& chunk : text_chunks) {
-        // Get UTF-8 byte length (same as Python's len(chunk.encode("utf-8")))
-        size_t chunk_length = chunk.size();
-
-        // Ensure we don't exceed bounds
-        if (j + chunk_length > ids.size() || i + chunk_length > id_list.size()) {
-            throw std::out_of_range("Index out of bounds while processing chunks");
+    void RegexFastTokenizer::train(const std::string text, const unsigned int vocab_size){
+        this->vocab_size = vocab_size;
+        auto id_list = presplit(text);
+        auto trainer = trainer::Trainer();
+        auto results = llm_fs::tokenizer::trainer::Trainer::train(id_list, static_cast<int>(vocab_size), static_cast<int>(init_tokens));
+        std::tie(this->merges, this->vocab) = calculate_merges_and_vocab(results, static_cast<int>(init_tokens));
+        std::cout << "First 20 merges:\n";
+        int count = 0;
+        for (const auto& merge : this->merges) {
+            if (count++ >= 20) break;
+            std::cout << "(" << merge.first.first << ", " << merge.first.second << ") -> " << merge.second << "\n";
         }
 
-        // Copy the chunk of ids
-        std::copy(ids.begin() + j,
-                 ids.begin() + j + chunk_length,
-                 id_list.begin() + i);
+        // Print first 20 vocabulary entries
+        std::cout << "First 20 vocabulary entries:\n";
+        count = 0;
+        for (const auto& entry : this->vocab) {
+            if (count++ >= 20) break;
+            std::cout << entry.first << " -> " << entry.second << "\n";
+        }
 
-        // Update positions (+1 for padding as in original Python)
-        i += chunk_length + 1;
-        j += chunk_length;
     }
 
-    return id_list;
+    std::vector<int32_t> RegexFastTokenizer::presplit(const std::string& text) const {
+        const std::vector<std::string>& text_chunks = generateTextChunks(text);
+        const std::vector<uint8_t>& ids = generateIds(text);
 
+        size_t total_size = 0;
+        for (const auto& chunk : text_chunks) {
+            total_size += chunk.size() + 1;
+        }
 
-return id_list;
+        std::vector<int32_t> id_list(total_size, 0);
 
+        size_t position_id_list = 0;
+        size_t position_id = 0;
 
-}
+        for (const std::string& chunk : text_chunks) {
+            const size_t chunk_length = chunk.size();
 
-std::vector<uint8_t> RegexFastTokenizer::generate_ids(const std::string& text){
-    return std::vector<uint8_t>(text.begin(), text.end());
-}
+            if (position_id + chunk_length > ids.size()) {
+                throw std::runtime_error("Mismatch between text chunks and generated IDs");
+            }
 
-std::vector<std::string> RegexFastTokenizer::generate_text_chunks(const std::string& text){
-    std::vector<std::string> tokens;
-    boost::sregex_iterator it(text.begin(), text.end(), pattern);
-    boost::sregex_iterator end;
+            std::copy_n(ids.begin() + static_cast<ptrdiff_t>(position_id),
+                     static_cast<ptrdiff_t>(chunk_length),
+                     id_list.begin() + static_cast<ptrdiff_t>(position_id_list));
 
-    for (; it != end; ++it) {
-        tokens.push_back(it->str());
+            position_id_list += chunk_length + 1;
+            position_id += chunk_length;
+        }
+
+        return id_list;
     }
 
-    return tokens;
+
+    const std::string& RegexFastTokenizer::getPatternGPT2() {
+        return pattern_gpt2;
+    }
+
+    const std::string& RegexFastTokenizer::getPatternGPT4() {
+        return pattern_gpt4;
+    }
+
+    std::vector<uint8_t> RegexFastTokenizer::generateIds(const std::string& text){
+        return std::vector<uint8_t>{text.begin(), text.end()};
+    }
+
+    std::tuple<std::map<std::pair<int, int>, int>, std::map<int, std::string>>
+    RegexFastTokenizer::calculate_merges_and_vocab(const std::vector<trainer::Merge>& results, const int init_tokens) {
+        std::map<std::pair<int, int>, int> merges;
+        std::map<int, std::string> vocab;
+
+        for (const auto& result : results) {
+            const std::string token_str(result.token_list.begin(), result.token_list.end());
+
+            if (result.token_id >= init_tokens) {
+                merges[{result.first_id, result.second_id}] = result.token_id;
+            }
+            vocab[result.token_id] = token_str;
+        }
+
+        return std::make_tuple(merges, vocab);
+    }
+
+    std::vector<std::string> RegexFastTokenizer::generateTextChunks(const std::string& text) const {
+        std::vector<std::string> tokens;
+        boost::sregex_iterator it(text.begin(), text.end(), pattern);
+
+        for (const boost::sregex_iterator end; it != end; ++it) {
+            tokens.push_back(it->str());
+        }
+
+        return tokens;
+    }
+
+    std::vector<int32_t> RegexFastTokenizer::generateIdsList(const std::string& text){
+        return std::vector<int>(text.length(), 0);
+    }
+
+
 }
 
-std::vector<int32_t> RegexFastTokenizer::generate_ids_list(const std::string& text){
-    return std::vector<int>(text.length(), 0);
-}
