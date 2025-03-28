@@ -35,8 +35,10 @@ namespace llm_fs::tokenizer {
         explicit RegexFastTokenizer(PatternType pattern_type);
 
         void train(std::string text, unsigned int vocab_size) override;
-        std::vector<int> encode(std::string text, const std::optional<std::vector<u_int8_t>> &ids = std::nullopt) override;
-        std::vector<int> encode_efficient(std::string text, const std::optional<std::vector<u_int8_t>> &ids = std::nullopt) override;
+        std::vector<uint32_t> encode(std::string text, const std::optional<std::vector<u_int8_t>> &ids) override;
+        std::vector<uint32_t> encode_efficient(std::string text, const std::optional<std::vector<u_int8_t>> &ids) override;
+
+        std::string decode(std::vector<uint32_t> tokens) override;
 
         static const std::string& getPatternGPT2();
         static const std::string& getPatternGPT4();

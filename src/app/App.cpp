@@ -16,16 +16,24 @@ int main() {
     auto tokenizer = RegexFastTokenizer(RegexFastTokenizer::getPatternGPT4());
 
     //small
-    tokenizer.train(text_dataset.substr(0, 1000), 256 + 10000);
+    // tokenizer.train(text_dataset.substr(0, 1000), 256 + 10000);
 
-    std::string query = "Hello World!";
-    auto tokens = tokenizer.encode_efficient(query);
+    //regular
+    tokenizer.train(text_dataset, 256+10000);
+
+    std::string query = "Hello World";
+    auto tokens = tokenizer.encode_efficient(query, std::nullopt);
+
 
     std::cout << "tokens: " << tokens.size() << std::endl;
     for (const auto& token : tokens) {
-        std::cout << token << std::endl;
+        std::cout << token << " ";
     }
+    std::cout << std::endl;
 
+    const std::string decoded = tokenizer.decode(tokens);
+
+    std::cout << decoded << std::endl;
 
 
 

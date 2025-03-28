@@ -45,14 +45,31 @@ namespace llm_fs::tokenizer {
 
     }
 
-    std::vector<int>  RegexFastTokenizer::encode(std::string text, const std::optional<std::vector<u_int8_t>> &ids ) {
+    std::vector<uint32_t>  RegexFastTokenizer::encode(std::string text, const std::optional<std::vector<u_int8_t>> &ids ) {
 
 
 
         return {};
     }
 
-    std::vector<int> RegexFastTokenizer::encode_efficient(std::string text, const std::optional<std::vector<u_int8_t>> &ids) {
+    std::string RegexFastTokenizer::decode(std::vector<uint32_t> tokens) {
+        std::vector<std::string> part_bytes;
+        for (int idx : tokens) {
+            auto vocab_it = vocab.find(idx);
+            std::cout << vocab_it->first << vocab_it->second << "\n";
+            if (vocab_it != vocab.end()) {
+                part_bytes.push_back(vocab_it->second);
+            }
+        }
+        std::string text_bytes;
+        for (const auto& bytes : part_bytes) {
+            text_bytes += bytes;
+        }
+        return text_bytes;
+    }
+
+
+    std::vector<uint32_t>  RegexFastTokenizer::encode_efficient(std::string text, const std::optional<std::vector<u_int8_t>> &ids) {
         if (text.empty()) return {};
         std::vector<u_int8_t> ids_processed = {};
         if (ids.has_value()) {
@@ -72,19 +89,13 @@ namespace llm_fs::tokenizer {
         }
 
         auto subencoder = llm_fs::tokenizer::encoder::Encoder();
-        // TODO - fix merge - THEY MIGHT BE WRONG TYPE - CHECK
-        auto results = subencoder.encode(ids_processed, split_indices, this->merges, this->init_tokens);
+
+        std::vector<uint32_t> result = subencoder.tokenize(ids_processed, split_indices, merges_processed, this->init_tokens);
 
 
+        return result;
 
 
-
-
-
-
-
-
-        return {};
     }
 
     std::vector<int32_t> RegexFastTokenizer::generateSplitIndices(const std::vector<std::string> &text_chunks, int id_processed_size) {
