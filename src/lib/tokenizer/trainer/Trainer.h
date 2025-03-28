@@ -1,10 +1,7 @@
 #ifndef TRAINER_H
 #define TRAINER_H
 
-#include <iostream>
 #include <vector>
-#include <cstdlib>
-#include <ctime>
 
 namespace llm_fs::tokenizer::trainer {
     struct Node

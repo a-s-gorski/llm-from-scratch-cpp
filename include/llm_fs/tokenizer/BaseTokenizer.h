@@ -1,6 +1,7 @@
 #ifndef BASETOKENIZER_H
 #define BASETOKENIZER_H
 
+#include <optional>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -11,6 +12,8 @@ namespace llm_fs::tokenizer {
     public:
         virtual ~BaseTokenizer() = default;
         virtual void train(std::string text, unsigned int vocab_size)=0;
+        virtual std::vector<int> encode(std::string text, const std::optional<std::vector<u_int8_t>> &ids = std::nullopt)=0;
+        virtual std::vector<int> encode_efficient(std::string text, const std::optional<std::vector<u_int8_t>> &ids = std::nullopt)=0;
     protected:
         std::unordered_map<int, int> merges = {};
         boost::regex pattern;

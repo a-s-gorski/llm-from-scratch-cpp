@@ -1,5 +1,9 @@
 #include "llm_fs/tokenizer/RegexFastTokenizer.h"
+#include "llm_fs/tokenizer/RegexFastTokenizer.h"
 #include "trainer/Trainer.h"
+#include "encoder/Encoder.h"
+
+#include <iostream>
 
 namespace llm_fs::tokenizer {
     RegexFastTokenizer::RegexFastTokenizer(PatternType pattern_type) : BaseTokenizer() {
@@ -40,6 +44,61 @@ namespace llm_fs::tokenizer {
         }
 
     }
+
+    std::vector<int>  RegexFastTokenizer::encode(std::string text, const std::optional<std::vector<u_int8_t>> &ids ) {
+
+
+
+        return {};
+    }
+
+    std::vector<int> RegexFastTokenizer::encode_efficient(std::string text, const std::optional<std::vector<u_int8_t>> &ids) {
+        if (text.empty()) return {};
+        std::vector<u_int8_t> ids_processed = {};
+        if (ids.has_value()) {
+            ids_processed = ids.value();
+        }else {
+            ids_processed = generateIds(text);
+        }
+        const std::vector<std::string>& text_chunks = generateTextChunks(text);
+        std::vector<int32_t> split_indices = generateSplitIndices(text_chunks, ids_processed.size());
+
+        unsigned long vocab_size = this->merges.size() + this->init_tokens;
+        std::vector<int64_t> merges_processed;
+        merges_processed.reserve(vocab_size);
+
+        for (const auto&[fst, snd]: this->merges) {
+            merges_processed.push_back(fst.first * vocab_size + fst.second);
+        }
+
+        auto subencoder = llm_fs::tokenizer::encoder::Encoder();
+        // TODO - fix merge - THEY MIGHT BE WRONG TYPE - CHECK
+        auto results = subencoder.encode(ids_processed, split_indices, this->merges, this->init_tokens);
+
+
+
+
+
+
+
+
+
+
+        return {};
+    }
+
+    std::vector<int32_t> RegexFastTokenizer::generateSplitIndices(const std::vector<std::string> &text_chunks, int id_processed_size) {
+        std::vector<int32_t> split_indices(text_chunks.size() + 1, 0);
+        int curr_el = 0;
+        for (size_t i = 0; i < text_chunks.size(); ++i) {
+            split_indices[i] = curr_el;
+            curr_el += text_chunks[i].size();
+        }
+        split_indices.back() = id_processed_size;
+        return  split_indices;
+    }
+
+
 
     std::vector<int32_t> RegexFastTokenizer::presplit(const std::string& text) const {
         const std::vector<std::string>& text_chunks = generateTextChunks(text);

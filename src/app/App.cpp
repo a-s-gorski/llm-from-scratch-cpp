@@ -18,6 +18,14 @@ int main() {
     //small
     tokenizer.train(text_dataset.substr(0, 1000), 256 + 10000);
 
+    std::string query = "Hello World!";
+    auto tokens = tokenizer.encode_efficient(query);
+
+    std::cout << "tokens: " << tokens.size() << std::endl;
+    for (const auto& token : tokens) {
+        std::cout << token << std::endl;
+    }
+
 
 
 
