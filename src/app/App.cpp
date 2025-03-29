@@ -7,49 +7,52 @@
 
 using llm_fs::dataset::TextDataset;
 using llm_fs::tokenizer::RegexFastTokenizer;
+using llm_fs::tokenizer::Tokenizer;
 
 
 int main() {
     auto dataset = TextDataset("../../../data/openwebtext-10k.txt");
     const auto text_dataset = dataset.load_dataset();
 
-    std::cout << text_dataset.size() << text_dataset.substr(0, 30) << std::endl;
+    std::string file_prefix = "../../../tokenizers/regular_tokenizer";
+    auto tokenizer = Tokenizer();
 
-    // auto tokenizer = llm_fs::tokenizer::Tokenizer();
 
-    auto tokenizer = llm_fs::tokenizer::RegexFastTokenizer(RegexFastTokenizer::getPatternGPT4());
+    // std::string file_prefix = "../../../tokenizers/regex_tokenizer";
+    // auto tokenizer = RegexFastTokenizer(RegexFastTokenizer::getPatternGPT4());
 
     //small
     // tokenizer.train(text_dataset.substr(0, 1000), 256 + 10000);
 
     //regular
-    tokenizer.train(text_dataset, 256+10000);
+    tokenizer.train(text_dataset.substr(0, 10000), 256 + 10000);
 
-    std::string input = "Hello my name is adam!!";
+    const std::string input = "Hello my name is adam!!";
 
     std::cout << input << std::endl;
 
-    auto encoded = tokenizer.encode(input, std::nullopt);
+    const auto encoded = tokenizer.encode(input, std::nullopt);
 
-    auto decoded = tokenizer.decode(encoded);
+    const auto decoded = tokenizer.decode(encoded);
 
     std::cout << decoded << std::endl;
 
+    // test after saving
 
-    // std::string query = "Hello World";
-    // auto tokens = tokenizer.encode(query, std::nullopt);
-    //
-    //
-    // std::cout << "tokens: " << tokens.size() << std::endl;
-    // for (const auto& token : tokens) {
-    //     std::cout << token << " ";
-    // }
-    // std::cout << std::endl;
-    //
-    // const std::string decoded = tokenizer.decode(tokens);
-    //
-    // std::cout << decoded << std::endl;
+    tokenizer.save(file_prefix);
 
 
+    auto tokenizer2 = RegexFastTokenizer(RegexFastTokenizer::getPatternGPT2());
 
+    tokenizer2.load(file_prefix.append(".model"));
+
+    const std::string input2 = "Hello my name is adam!!";
+
+    std::cout << input2 << std::endl;
+
+    auto encoded2 = tokenizer.encode(input, std::nullopt);
+
+    const auto decoded2 = tokenizer.decode(encoded);
+
+    std::cout << decoded2 << std::endl;
 }

@@ -13,8 +13,6 @@ namespace llm_fs::dataset {
         std::stringstream buffer;
         buffer << file.rdbuf();
         return buffer.str();
-
     }
-
 }
 

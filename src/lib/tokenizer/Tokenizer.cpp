@@ -1,22 +1,20 @@
 #include "llm_fs/tokenizer/Tokenizer.h"
 
 namespace llm_fs::tokenizer {
-
     std::string Tokenizer::decode(std::vector<uint32_t> tokens) {
         // given ids (list of integers), return C++ string
         std::string text_bytes;
-        for (const auto& idx : tokens) {
+        for (const auto &idx: tokens) {
             if (vocab.find(idx) != vocab.end()) {
                 text_bytes += vocab[idx];
             } else {
-                // Handle unknown tokens (you might want to use a replacement character)
                 text_bytes += "�";
             }
         }
         return text_bytes;
     }
 
-    std::vector<uint32_t> Tokenizer::encode(std::string text, const std::optional<std::vector<uint8_t>>& ids) {
+    std::vector<uint32_t> Tokenizer::encode(std::string text, const std::optional<std::vector<uint8_t> > &ids) {
         // given a string text, return the token ids
         std::vector<int> byte_ids;
         if (ids.has_value()) {
@@ -24,7 +22,7 @@ namespace llm_fs::tokenizer {
             byte_ids.assign(ids->begin(), ids->end());
         } else {
             // Convert text to raw bytes
-            for (char c : text) {
+            for (char c: text) {
                 byte_ids.push_back(static_cast<uint8_t>(c));
             }
         }
@@ -38,7 +36,7 @@ namespace llm_fs::tokenizer {
             auto best_pair = stats.begin()->first;
             int min_merge_index = merges.count(best_pair) ? merges[best_pair] : INT_MAX;
 
-            for (const auto& [pair, count] : stats) {
+            for (const auto &[pair, count]: stats) {
                 int current_merge_index = merges.count(pair) ? merges[pair] : INT_MAX;
                 if (current_merge_index < min_merge_index) {
                     min_merge_index = current_merge_index;
@@ -61,54 +59,43 @@ namespace llm_fs::tokenizer {
 
     void Tokenizer::train(std::string text, unsigned int vocab_size) {
         assert(vocab_size >= 256);
-        unsigned int num_merges = vocab_size - 256;
-
-        // input text preprocessing
+        const unsigned int num_merges = vocab_size - 256;
         std::vector<int> ids(text.begin(), text.end());
 
-        // initialize vocabulary
         for (int idx = 0; idx < 256; ++idx) {
             vocab[idx] = {static_cast<unsigned char>(idx)};
         }
 
-        // iteratively merge the most common pairs
         for (unsigned int i = 0; i < num_merges; ++i) {
-            // count pair occurrences
             auto stats = get_stats(ids);
             if (stats.empty()) break;
 
-            // find the most frequent pair
             auto max_pair = stats.begin()->first;
             int max_count = stats.begin()->second;
-            for (const auto& stat : stats) {
+            for (const auto &stat: stats) {
                 if (stat.second > max_count) {
                     max_pair = stat.first;
                     max_count = stat.second;
                 }
             }
 
-            // mint new token
             int idx = 256 + i;
 
-            // replace all occurrences of pair with new token
             ids = merge(ids, max_pair, idx);
 
-            // save the merge
             merges[max_pair] = idx;
 
-            // update vocabulary
             auto merged_bytes = vocab[max_pair.first];
             auto second_part = vocab[max_pair.second];
             merged_bytes.insert(merged_bytes.end(), second_part.begin(), second_part.end());
             vocab[idx] = merged_bytes;
         }
-
-        // merges and vocab are now saved as member variables
     }
 
-    std::map<std::pair<int, int>, int> Tokenizer::get_stats(const std::vector<int>& ids, std::map<std::pair<int, int>, int>* counts) {
+    std::map<std::pair<int, int>, int> Tokenizer::get_stats(const std::vector<int> &ids,
+                                                            std::map<std::pair<int, int>, int> *counts) {
         std::map<std::pair<int, int>, int> local_counts;
-        std::map<std::pair<int, int>, int>& result = counts ? *counts : local_counts;
+        std::map<std::pair<int, int>, int> &result = counts ? *counts : local_counts;
 
         for (size_t i = 0; i + 1 < ids.size(); ++i) {
             std::pair<int, int> pair = {ids[i], ids[i + 1]};
@@ -117,7 +104,7 @@ namespace llm_fs::tokenizer {
         return result;
     }
 
-    std::vector<int> Tokenizer::merge(const std::vector<int>& ids, const std::pair<int, int>& pair, int idx) {
+    std::vector<int> Tokenizer::merge(const std::vector<int> &ids, const std::pair<int, int> &pair, int idx) {
         std::vector<int> newids;
         size_t i = 0;
 
@@ -133,5 +120,4 @@ namespace llm_fs::tokenizer {
 
         return newids;
     }
-
-} // namespace llm_fs::tokenizer
+}

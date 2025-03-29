@@ -1,5 +1,6 @@
 add_library(llm_fs_lib STATIC
         dataset/TextDataset.cpp
+        tokenizer/BaseTokenizer.cpp
         tokenizer/RegexFastTokenizer.cpp
         tokenizer/Tokenizer.cpp
         tokenizer/trainer/Trainer.cpp
