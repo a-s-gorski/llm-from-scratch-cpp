@@ -1,9 +1,11 @@
 add_library(llm_fs_lib STATIC
         dataset/TextDataset.cpp
         tokenizer/RegexFastTokenizer.cpp
+        tokenizer/Tokenizer.cpp
         tokenizer/trainer/Trainer.cpp
         tokenizer/encoder/Encoder.cpp
         tokenizer/encoder/Encoder.h
+
 )
 
 # Make include/ available for both the library and other targets

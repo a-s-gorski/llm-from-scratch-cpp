@@ -13,7 +13,6 @@ namespace llm_fs::tokenizer {
         virtual ~BaseTokenizer() = default;
         virtual void train(std::string text, unsigned int vocab_size)=0;
         virtual std::vector<uint32_t> encode(std::string text, const std::optional<std::vector<u_int8_t>> &ids )=0;
-        virtual std::vector<uint32_t> encode_efficient(std::string text, const std::optional<std::vector<u_int8_t>> &ids )=0;
         virtual std::string decode(std::vector<uint32_t> tokens)=0;
     protected:
         std::unordered_map<int, int> merges = {};
