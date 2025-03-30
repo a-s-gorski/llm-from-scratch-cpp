@@ -11,21 +11,21 @@ using llm_fs::tokenizer::Tokenizer;
 
 
 int main() {
-    auto dataset = TextDataset("../../../data/openwebtext-10k.txt");
+    auto dataset = TextDataset("../../data/openwebtext-10k.txt");
     const auto text_dataset = dataset.load_dataset();
 
-    std::string file_prefix = "../../../tokenizers/regular_tokenizer";
-    auto tokenizer = Tokenizer();
+    // std::string file_prefix = "../../../tokenizers/regular_tokenizer";
+    // auto tokenizer = Tokenizer();
 
 
-    // std::string file_prefix = "../../../tokenizers/regex_tokenizer";
-    // auto tokenizer = RegexFastTokenizer(RegexFastTokenizer::getPatternGPT4());
+    std::string file_prefix = "../../tokenizers/regex_tokenizer";
+    auto tokenizer = RegexFastTokenizer(RegexFastTokenizer::getPatternGPT2());
 
     //small
     // tokenizer.train(text_dataset.substr(0, 1000), 256 + 10000);
 
     //regular
-    tokenizer.train(text_dataset.substr(0, 10000), 256 + 10000);
+    tokenizer.train(text_dataset, 256 + 10000);
 
     const std::string input = "Hello my name is adam!!";
 

@@ -68,9 +68,6 @@ namespace llm_fs::tokenizer {
             }
         }
 
-        std::cout << "Encoded: ";
-        for (auto t: encoded_tokens) std::cout << t << " ";
-        std::cout << std::endl;
         return encoded_tokens;
     }
 
@@ -84,7 +81,6 @@ namespace llm_fs::tokenizer {
             }
         }
 
-        std::cout << "Decoded: " << output << std::endl;
         return output;
     }
 }
