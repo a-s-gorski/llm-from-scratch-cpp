@@ -7,6 +7,7 @@ namespace llm_fs::tokenizer {
     class Tokenizer final : public BaseTokenizer {
     public:
         Tokenizer() = default;
+        std::unique_ptr<BaseTokenizer> clone() const override;
 
         void train(std::string text, unsigned int vocab_size) override;
 

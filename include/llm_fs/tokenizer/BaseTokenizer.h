@@ -13,17 +13,12 @@ namespace llm_fs::tokenizer {
     class BaseTokenizer {
     public:
         virtual ~BaseTokenizer() = default;
-
+        virtual std::unique_ptr<BaseTokenizer> clone() const = 0;
         virtual void train(std::string text, unsigned int vocab_size) =0;
-
         virtual std::vector<uint32_t> encode(std::string text, const std::optional<std::vector<uint8_t> > &ids) =0;
-
         virtual std::string decode(std::vector<uint32_t> tokens) =0;
-
         void load(const std::string &model_file);
-
         void save(const std::string &file_prefix);
-
     protected:
         std::map<std::pair<int, int>, int> merges;
         boost::regex pattern;
@@ -31,7 +26,6 @@ namespace llm_fs::tokenizer {
         std::map<uint32_t, std::string> vocab;
         unsigned int vocab_size = 0;
         unsigned int init_tokens = 256;
-
         std::map<uint32_t, std::string> _build_vocab();
     };
 }

@@ -21,6 +21,7 @@ namespace llm_fs::tokenizer {
         };
 
         RegexFastTokenizer();
+        std::unique_ptr<BaseTokenizer> clone() const override;
 
         explicit RegexFastTokenizer(const std::string &pattern);
 

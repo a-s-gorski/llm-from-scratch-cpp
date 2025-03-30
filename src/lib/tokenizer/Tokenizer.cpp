@@ -1,6 +1,11 @@
 #include "llm_fs/tokenizer/Tokenizer.h"
 
 namespace llm_fs::tokenizer {
+
+    std::unique_ptr<BaseTokenizer> Tokenizer::clone() const {
+        return  std::make_unique<Tokenizer>(*this);
+    }
+
     std::string Tokenizer::decode(std::vector<uint32_t> tokens) {
         // given ids (list of integers), return C++ string
         std::string text_bytes;
