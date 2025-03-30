@@ -1,6 +1,7 @@
 #include "llm_fs/tokenizer/RegexFastTokenizer.h"
 #include <iostream>
 
+
 namespace llm_fs::tokenizer {
     const std::string RegexFastTokenizer::pattern_gpt2 =
             R"('s|'t|'re|'ve|'m|'ll|'d| ?[a-zA-ZÀ-ÿ]+| ?[0-9]+| ?[^\s\w]+|\s+(?!\S)|\s+)";
