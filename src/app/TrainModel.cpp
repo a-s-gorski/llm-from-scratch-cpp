@@ -40,14 +40,14 @@ int main() {
         torch::data::DataLoaderOptions().batch_size(3).drop_last(false)
     );
 
-    // for (auto& batch : *dataloader) {
-    //     std::cout << batch.size() << std::endl;
-    //     std::cout << batch[0].data.size(0) << std::endl;
-    //     std::cout << batch[0].target.size(0) << std::endl;
-    //     std::cout << batch[1].data.size(0) << std::endl;
-    //     std::cout << batch[1].target.size(0) << std::endl;
-    //     break;
-    // }
+    for (auto& batch : *dataloader) {
+        std::cout << batch.size() << std::endl;
+        std::cout << batch[0].data.size(0) << std::endl;
+        std::cout << batch[0].target.size(0) << std::endl;
+        std::cout << batch[1].data.size(0) << std::endl;
+        std::cout << batch[1].target.size(0) << std::endl;
+        break;
+    }
 
     return 0;
 }

@@ -6,6 +6,11 @@ add_library(llm_fs_lib STATIC
         tokenizer/trainer/Trainer.cpp
         tokenizer/encoder/Encoder.cpp
         model/dataset/GPTDataset.cpp
+        model/layers/GELU.cpp
+        model/layers/LayerNorm.cpp
+        model/layers/MultiHeadAttention.cpp
+        model/layers/TransformerBlock.cpp
+        model/GPTModel.cpp
 )
 
 target_include_directories(llm_fs_lib PUBLIC

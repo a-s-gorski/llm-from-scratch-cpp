@@ -9,7 +9,6 @@ using llm_fs::dataset::TextDataset;
 using llm_fs::tokenizer::RegexFastTokenizer;
 using llm_fs::tokenizer::Tokenizer;
 
-
 int main() {
     auto dataset = TextDataset("../../data/openwebtext-10k.txt");
     const auto text_dataset = dataset.load_dataset();
