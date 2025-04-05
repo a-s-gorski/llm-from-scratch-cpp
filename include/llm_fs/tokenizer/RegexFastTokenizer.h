@@ -1,4 +1,3 @@
-// RegexFastTokenizer.h
 #ifndef REGEXFASTTOKENIZER_H
 #define REGEXFASTTOKENIZER_H
 

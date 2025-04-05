@@ -8,21 +8,27 @@
 
 namespace llm_fs::model::layers {
 
-    class TransformerBlockImpl : public torch::nn::Module {
-    public:
-        TransformerBlockImpl(int64_t emb_dim, int64_t context_length, int num_heads, double drop_rate, bool qkv_bias);
+    struct GPTConfig {
+        int vocab_size=256;
+        int context_length=256;
+        int emb_dim=768;
+        int n_heads=12;
+        int n_layers=12;
+        double drop_rate = 0.1;
+        bool qkv_bias = false;
+    };
 
+    class TransformerBlockImpl final : public torch::nn::Module {
+    public:
+        explicit TransformerBlockImpl(const GPTConfig &config);
+        TransformerBlockImpl(int64_t emb_dim, int64_t context_length, int num_heads, double drop_rate, bool qkv_bias);
         torch::Tensor forward(torch::Tensor x);
 
     private:
-        CustomMultiheadAttention att;
-        FeedForward ff;
-        LayerNorm norm1, norm2;
-        torch::nn::Dropout drop_shortcut;
-        // torch::nn::ModuleHolder<CustomMultiheadAttention> att;
-        // torch::nn::ModuleHolder<FeedForward> ff;
-        // torch::nn::ModuleHolder<LayerNorm> norm1, norm2;
-        // torch::nn::Dropout drop_shortcut;
+        CustomMultiheadAttention att{nullptr};
+        FeedForward ff{nullptr};
+        LayerNorm norm1{nullptr}, norm2{nullptr};
+        torch::nn::Dropout drop_shortcut{nullptr};
     };
 
     TORCH_MODULE(TransformerBlock);

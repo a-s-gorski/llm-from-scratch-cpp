@@ -8,6 +8,7 @@ add_library(llm_fs_lib STATIC
         model/dataset/GPTDataset.cpp
         model/layers/GELU.cpp
         model/layers/LayerNorm.cpp
+        model/layers/FeedForward.cpp
         model/layers/MultiHeadAttention.cpp
         model/layers/TransformerBlock.cpp
         model/GPTModel.cpp

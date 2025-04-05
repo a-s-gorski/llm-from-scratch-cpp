@@ -13,3 +13,4 @@ namespace llm_fs::model::layers {
     torch::Tensor FeedForwardImpl::forward(torch::Tensor x) {
         return layers->forward(x);
     }
+}

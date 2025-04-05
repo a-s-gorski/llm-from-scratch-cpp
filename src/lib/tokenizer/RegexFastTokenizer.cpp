@@ -1,6 +1,4 @@
 #include "llm_fs/tokenizer/RegexFastTokenizer.h"
-#include <iostream>
-
 
 namespace llm_fs::tokenizer {
     std::unique_ptr<BaseTokenizer> RegexFastTokenizer::clone() const {
