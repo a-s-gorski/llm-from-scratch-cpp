@@ -1,4 +1,8 @@
 #include "llm_fs/tokenizer/RegexFastTokenizer.h"
+#include <fstream>
+#include <nlohmann/json.hpp>
+
+#include <iostream>
 
 namespace llm_fs::tokenizer {
     std::unique_ptr<BaseTokenizer> RegexFastTokenizer::clone() const {
@@ -46,6 +50,8 @@ namespace llm_fs::tokenizer {
                 if (vocab.size() >= vocab_size) break;
             }
         }
+        std::cout << "vocab size after training: "<< vocab.size() << std::endl;
+        vocab_size = vocab.size();
     }
 
     std::vector<uint32_t>
@@ -81,4 +87,82 @@ namespace llm_fs::tokenizer {
 
         return output;
     }
+
+    uint32_t RegexFastTokenizer::vocabSize() const {
+        std::cout << "vocab size: " << vocab.size() << std::endl;
+        std::cout << "reverse vocab size: " << vocab_inverse.size() << std::endl;
+        return vocab_size;
+    }
+
+    void RegexFastTokenizer::save(const std::string& file_prefix) {
+    // ---- Save vocab ----
+    nlohmann::json vocab_json;
+    for (const auto& [id, token] : vocab) {
+        vocab_json[std::to_string(id)] = token;
+    }
+
+    std::ofstream vocab_out(file_prefix + "_vocab.json");
+    if (!vocab_out) {
+        throw std::runtime_error("Failed to open vocab file for saving: " + file_prefix + "_vocab.json");
+    }
+    vocab_out << vocab_json.dump(2);
+    vocab_out.close();
+
+    // ---- Save merges ----
+    nlohmann::json merges_json;
+    for (const auto& [pair, id] : merges) {
+        std::string key = std::to_string(pair.first) + "," + std::to_string(pair.second);
+        merges_json[key] = id;
+    }
+
+    std::ofstream merges_out(file_prefix + "_merges.json");
+    if (!merges_out) {
+        throw std::runtime_error("Failed to open merges file for saving: " + file_prefix + "_merges.json");
+    }
+    merges_out << merges_json.dump(2);
+    merges_out.close();
+}
+
+void RegexFastTokenizer::load(const std::string& file_prefix) {
+    // ---- Load vocab ----
+    std::ifstream vocab_in(file_prefix + "_vocab.json");
+    if (!vocab_in) {
+        throw std::runtime_error("Failed to open vocab file for loading: " + file_prefix + "_vocab.json");
+    }
+
+    nlohmann::json vocab_json;
+    vocab_in >> vocab_json;
+    vocab_in.close();
+
+    vocab.clear();
+    vocab_inverse.clear();
+
+    for (auto& [id_str, token] : vocab_json.items()) {
+        uint32_t id = std::stoul(id_str);
+        vocab[id] = token;
+        vocab_inverse[token] = id;
+    }
+
+    vocab_size = vocab.size();
+
+    // ---- Load merges ----
+    std::ifstream merges_in(file_prefix + "_merges.json");
+    if (!merges_in) {
+        throw std::runtime_error("Failed to open merges file for loading: " + file_prefix + "_merges.json");
+    }
+
+    nlohmann::json merges_json;
+    merges_in >> merges_json;
+    merges_in.close();
+
+    merges.clear();
+    for (auto& [key, id] : merges_json.items()) {
+        auto comma_pos = key.find(',');
+        if (comma_pos == std::string::npos) continue;
+
+        int first = std::stoi(key.substr(0, comma_pos));
+        int second = std::stoi(key.substr(comma_pos + 1));
+        merges[{first, second}] = id;
+    }
+}
 }

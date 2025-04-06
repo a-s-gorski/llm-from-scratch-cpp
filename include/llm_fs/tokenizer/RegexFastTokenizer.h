@@ -21,20 +21,17 @@ namespace llm_fs::tokenizer {
 
         RegexFastTokenizer();
         std::unique_ptr<BaseTokenizer> clone() const override;
-
         explicit RegexFastTokenizer(const std::string &pattern);
-
         explicit RegexFastTokenizer(PatternType pattern_type);
-
         void train(std::string text, unsigned int vocab_size) override;
-
         std::vector<uint32_t> encode(std::string text, const std::optional<std::vector<uint8_t> > &ids) override;
-
         std::string decode(std::vector<uint32_t> tokens) override;
-
         static const std::string &getPatternGPT2();
-
         static const std::string &getPatternGPT4();
+        uint32_t vocabSize() const;
+        void save(const std::string& file_prefix) override;
+        void load(const std::string& file_prefix) override;
+
 
     private:
         boost::regex pattern;
@@ -44,6 +41,7 @@ namespace llm_fs::tokenizer {
 
         static const std::string pattern_gpt2;
         static const std::string pattern_gpt4;
+
     };
 }
 

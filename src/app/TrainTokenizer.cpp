@@ -2,7 +2,6 @@
 #include "llm_fs/dataset/TextDataset.h"
 #include "llm_fs/tokenizer/RegexFastTokenizer.h"
 #include <filesystem>
-
 #include "llm_fs/tokenizer/Tokenizer.h"
 
 using llm_fs::dataset::TextDataset;
@@ -13,45 +12,41 @@ int main() {
     auto dataset = TextDataset("../../data/openwebtext-10k.txt");
     const auto text_dataset = dataset.load_dataset();
 
-    // std::string file_prefix = "../../../tokenizers/regular_tokenizer";
-    // auto tokenizer = Tokenizer();
-
-
     std::string file_prefix = "../../tokenizers/regex_tokenizer";
     auto tokenizer = RegexFastTokenizer(RegexFastTokenizer::getPatternGPT2());
 
-    //small
-    // tokenizer.train(text_dataset.substr(0, 1000), 256 + 10000);
+    // std::string file_prefix = "../../tokenizers/tokenizer";
+    // auto tokenizer = Tokenizer();
 
-    //regular
     tokenizer.train(text_dataset, 256 + 10000);
 
     const std::string input = "Hello my name is adam!!";
-
     std::cout << input << std::endl;
 
     const auto encoded = tokenizer.encode(input, std::nullopt);
-
     const auto decoded = tokenizer.decode(encoded);
 
-    std::cout << decoded << std::endl;
-
-    // test after saving
+    std::cout << "Decoded after encoding: " << decoded << std::endl;
 
     tokenizer.save(file_prefix);
 
-
     auto tokenizer2 = RegexFastTokenizer(RegexFastTokenizer::getPatternGPT2());
+    tokenizer2.load(file_prefix);
 
-    tokenizer2.load(file_prefix.append(".model"));
+    // auto tokenizer2 = Tokenizer();
+    // tokenizer2.load(file_prefix);
 
     const std::string input2 = "Hello my name is adam!!";
-
     std::cout << input2 << std::endl;
 
-    auto encoded2 = tokenizer.encode(input, std::nullopt);
+    // Encode and decode the same input after loading the model
+    auto encoded2 = tokenizer2.encode(input2, std::nullopt);
+    const auto decoded2 = tokenizer2.decode(encoded2);
 
-    const auto decoded2 = tokenizer.decode(encoded);
+    std::cout << "Decoded after loading tokenizer: " << decoded2 << std::endl;
 
-    std::cout << decoded2 << std::endl;
+    // Display vocabulary size after loading the tokenizer
+    std::cout << "Vocabulary size: " << tokenizer2.vocabSize() << std::endl;
+
+    return 0;
 }

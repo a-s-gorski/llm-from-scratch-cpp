@@ -4,6 +4,16 @@ project(llm_fs)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include(FetchContent)
+
+FetchContent_Declare(
+        json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.11.2  # Or latest stable tag
+)
+
+FetchContent_MakeAvailable(json)
+
 find_package(Boost REQUIRED COMPONENTS filesystem system)
 include_directories(${Boost_INCLUDE_DIRS})
 
