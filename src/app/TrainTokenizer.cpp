@@ -9,7 +9,7 @@ using llm_fs::tokenizer::RegexFastTokenizer;
 using llm_fs::tokenizer::Tokenizer;
 
 int main() {
-    auto dataset = TextDataset("../../data/openwebtext-10k.txt");
+    auto dataset = TextDataset("../../data/brown.txt");
     const auto text_dataset = dataset.load_dataset();
 
     std::string file_prefix = "../../tokenizers/regex_tokenizer";
@@ -18,9 +18,9 @@ int main() {
     // std::string file_prefix = "../../tokenizers/tokenizer";
     // auto tokenizer = Tokenizer();
 
-    tokenizer.train(text_dataset, 256 + 10000);
+    tokenizer.train(text_dataset, 256 + 20000);
 
-    const std::string input = "Hello my name is adam!!";
+    const std::string input = " my name is Adam";
     std::cout << input << std::endl;
 
     const auto encoded = tokenizer.encode(input, std::nullopt);
@@ -36,7 +36,7 @@ int main() {
     // auto tokenizer2 = Tokenizer();
     // tokenizer2.load(file_prefix);
 
-    const std::string input2 = "Hello my name is adam!!";
+    const std::string input2 = "my name is Adam";
     std::cout << input2 << std::endl;
 
     // Encode and decode the same input after loading the model

@@ -42,6 +42,9 @@ namespace llm_fs::tokenizer {
         static const std::string pattern_gpt2;
         static const std::string pattern_gpt4;
 
+        static std::string toLowerCase(const std::string& str);
+        static std::string toCapitalizedCase(const std::string &str);
+
     };
 }
 

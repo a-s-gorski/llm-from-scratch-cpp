@@ -12,22 +12,12 @@ namespace llm_fs::model::dataset {
                           int max_length,
                           int stride);
 
-        // Move constructor
         GPTDataset(GPTDataset&& other) noexcept = default;
-
-        // Delete copy constructor
         GPTDataset(const GPTDataset&) = delete;
-
-        // Delete copy assignment
         GPTDataset& operator=(const GPTDataset&) = delete;
-
-        // Move assignment
         GPTDataset& operator=(GPTDataset&&) noexcept = default;
-
-        std::optional<unsigned long> size() const override;
+        c10::optional<size_t> size() const override;
         torch::data::Example<> get(size_t index) override;
-
-        // Add this to make the dataset work with the stateless data loader
         bool is_stateful() const noexcept { return false; }
 
     private:

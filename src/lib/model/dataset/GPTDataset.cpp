@@ -25,7 +25,7 @@ namespace llm_fs::model::dataset {
         }
     }
 
-    std::optional<unsigned long> GPTDataset::size() const {
+    c10::optional<size_t> GPTDataset::size() const {
         return input_ids_.size();
     }
 

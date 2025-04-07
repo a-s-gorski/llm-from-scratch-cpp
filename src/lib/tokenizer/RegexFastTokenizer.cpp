@@ -36,6 +36,19 @@ namespace llm_fs::tokenizer {
                                    boost::regex_constants::icase | boost::regex_constants::optimize) {
     }
 
+    std::string RegexFastTokenizer::toLowerCase(const std::string& str) {
+        std::string lower_case_str = str;
+        std::transform(lower_case_str.begin(), lower_case_str.end(), lower_case_str.begin(), ::tolower);
+        return lower_case_str;
+    }
+
+    std::string RegexFastTokenizer::toCapitalizedCase(const std::string& str) {
+        if (str.empty()) return str;
+        std::string capitalized_str = str;
+        capitalized_str[0] = std::toupper(capitalized_str[0]);
+        return capitalized_str;
+    }
+
     void RegexFastTokenizer::train(std::string text, unsigned int vocab_size) {
         boost::sregex_iterator it(text.begin(), text.end(), pattern);
         boost::sregex_iterator end;
@@ -59,16 +72,27 @@ namespace llm_fs::tokenizer {
         std::vector<uint32_t> encoded_tokens;
         boost::sregex_iterator it(text.begin(), text.end(), pattern);
         boost::sregex_iterator end;
+        const uint32_t UNK_ID = 0;
 
         for (; it != end; ++it) {
             std::string token = it->str();
             if (vocab_inverse.find(token) != vocab_inverse.end()) {
                 encoded_tokens.push_back(vocab_inverse[token]);
-            } else {
-                uint32_t new_id = vocab.size();
-                vocab[new_id] = token;
-                vocab_inverse[token] = new_id;
-                encoded_tokens.push_back(new_id);
+            }
+            // Check for lowercase version of the token
+            else if (vocab_inverse.find(token) == vocab_inverse.end() && vocab_inverse.find(toLowerCase(token)) != vocab_inverse.end()) {
+                encoded_tokens.push_back(vocab_inverse[toLowerCase(token)]);
+            }
+            // Check for capitalized version of the token
+            else if (vocab_inverse.find(token) == vocab_inverse.end() && vocab_inverse.find(toCapitalizedCase(token)) != vocab_inverse.end()) {
+                encoded_tokens.push_back(vocab_inverse[toCapitalizedCase(token)]);
+            }
+            else {
+                encoded_tokens.push_back(UNK_ID);
+                // uint32_t new_id = vocab.size();
+                // vocab[new_id] = token;
+                // vocab_inverse[token] = new_id;
+                // encoded_tokens.push_back(new_id);
             }
         }
 

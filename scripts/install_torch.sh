@@ -12,12 +12,12 @@ if [ -d "$TORCH_DIR" ]; then
 fi
 
 echo "Downloading LibTorch $TORCH_VERSION..."
-wget -q --show-progress "https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-${TORCH_VERSION}+cpu.zip"
+wget -q --show-progress "https://download.pytorch.org/libtorch/nightly/cu121/libtorch-cxx11-abi-shared-with-deps-${TORCH_VERSION}.dev20230411%2Bcu121.zip"
 
 echo "Extracting LibTorch..."
-unzip -q "libtorch-shared-with-deps-${TORCH_VERSION}%2Bcpu.zip" -d $INSTALL_DIR
+unzip -q "libtorch-cxx11-abi-shared-with-deps-${TORCH_VERSION}.dev20230411%2Bcu121.zip" -d $INSTALL_DIR
 
 echo "Cleaning up..."
-rm "libtorch-shared-with-deps-${TORCH_VERSION}%2Bcpu.zip"
+rm "libtorch-cxx11-abi-shared-with-deps-${TORCH_VERSION}.dev20230411%2Bcu121.zip"
 
 echo "LibTorch installed at $TORCH_DIR"
