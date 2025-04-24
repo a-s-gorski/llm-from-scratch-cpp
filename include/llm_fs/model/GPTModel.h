@@ -39,12 +39,17 @@ namespace llm_fs::model {
             int eval_iter,
             bool verbose = true);
 
+        std::string generateResponse(const std::string &message, tokenizer::BaseTokenizer &tokenizer, int max_new_tokens = 50);
+
     private:
         torch::nn::Embedding tok_emb_{nullptr}, pos_emb_{nullptr};
         torch::nn::Dropout drop_emb_{nullptr};
         torch::nn::Sequential trf_blocks_;
         layers::LayerNorm final_norm_{nullptr};
         torch::nn::Linear out_head_{nullptr};
+
+        static std::vector<uint32_t> tensorToU32Vector(const torch::Tensor& tensor);
+        torch::Tensor computeOutputEval(const torch::Tensor &ids, int max_new_tokens, int context_size);
 
         torch::Tensor calcLossBatch(const torch::Tensor &input_batch, const torch::Tensor &target_batch,
                                     torch::DeviceType device);

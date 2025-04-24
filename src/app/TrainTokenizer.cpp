@@ -2,6 +2,8 @@
 #include "llm_fs/dataset/TextDataset.h"
 #include "llm_fs/tokenizer/RegexFastTokenizer.h"
 #include <filesystem>
+#include <c10/util/typeid.h>
+
 #include "llm_fs/tokenizer/Tokenizer.h"
 
 using llm_fs::dataset::TextDataset;
@@ -9,7 +11,7 @@ using llm_fs::tokenizer::RegexFastTokenizer;
 using llm_fs::tokenizer::Tokenizer;
 
 int main() {
-    auto dataset = TextDataset("../../data/brown.txt");
+    auto dataset = TextDataset("../../data/openwebtext-10k.txt");
     const auto text_dataset = dataset.load_dataset();
 
     std::string file_prefix = "../../tokenizers/regex_tokenizer";
@@ -39,14 +41,13 @@ int main() {
     const std::string input2 = "my name is Adam";
     std::cout << input2 << std::endl;
 
-    // Encode and decode the same input after loading the model
     auto encoded2 = tokenizer2.encode(input2, std::nullopt);
     const auto decoded2 = tokenizer2.decode(encoded2);
 
     std::cout << "Decoded after loading tokenizer: " << decoded2 << std::endl;
 
-    // Display vocabulary size after loading the tokenizer
     std::cout << "Vocabulary size: " << tokenizer2.vocabSize() << std::endl;
+
 
     return 0;
 }

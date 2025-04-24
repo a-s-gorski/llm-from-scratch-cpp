@@ -29,6 +29,74 @@ namespace llm_fs::model {
 
     }
 
+    std::string GPTModelImpl::generateResponse(const std::string &message, tokenizer::BaseTokenizer &tokenizer, int max_new_tokens) {
+        this->eval();
+
+        std::vector<uint32_t> encoded = tokenizer.encode(message, std::nullopt);
+        torch::Tensor encoded_tensor = torch::tensor(encoded.data(), torch::kLong).unsqueeze(0);
+        auto context_size = this->pos_emb_->weight.size(0);
+        auto result_ids_tensor = this->computeOutputEval(encoded_tensor, max_new_tokens, context_size);
+        result_ids_tensor = result_ids_tensor.to(torch::kCPU).contiguous().view(-1);
+        std::vector<uint32_t> result_ids(result_ids_tensor.data_ptr<int64_t>(),
+                                             result_ids_tensor.data_ptr<int64_t>() + result_ids_tensor.numel());
+
+        std::string decoded_text = tokenizer.decode(result_ids);
+
+        this->train();
+        return decoded_text;
+    }
+
+    torch::Tensor GPTModelImpl::computeOutputEval(const torch::Tensor &ids, int max_new_tokens, int context_size) {
+        torch::Device device = this->parameters().front().device();
+        torch::Tensor result = ids.unsqueeze(0).clone().to(device);
+
+        for (int i = 0; i < max_new_tokens; ++i) {
+
+
+            torch::Tensor idx_cond = result.index({
+                torch::indexing::Slice(),
+                torch::indexing::Slice(-context_size, torch::indexing::None)
+            });
+
+            torch::NoGradGuard no_grad;
+
+            // Forward pass
+            torch::Tensor logits = this->forward({idx_cond});
+
+            // std::cout << "logits sizes: " << logits.sizes() << std::endl;
+
+
+            // Focus only on the last time step
+            logits = logits.index({
+                torch::indexing::Slice(),
+                -1,
+                torch::indexing::Slice()
+            });
+
+            // Get probabilities and sample (greedy)
+            torch::Tensor probas = torch::softmax(logits, -1);
+            torch::Tensor idx_next = std::get<1>(probas.max(-1, /*keepdim=*/true));
+
+            result = torch::cat({result, idx_next}, 1);
+        }
+
+        return result;
+    }
+
+
+    std::vector<uint32_t> GPTModelImpl::tensorToU32Vector(const torch::Tensor& tensor) {
+        torch::Tensor cpu_tensor = tensor.to(torch::kCPU).contiguous().view(-1); // Flatten and move to CPU
+        std::vector<uint32_t> result(cpu_tensor.size(0));
+
+        auto data_ptr = cpu_tensor.data_ptr<int64_t>(); // Torch usually stores indices as int64_t
+        for (int64_t i = 0; i < cpu_tensor.size(0); ++i) {
+            result[i] = static_cast<uint32_t>(data_ptr[i]);
+        }
+
+
+        return result;
+    }
+
 
     GPTModelImpl::GPTModelImpl(const int vocab_size, const int context_length, const int emb_dim, const int n_heads, const int n_layers, const double drop_rate, const bool qkv_bias)
     : GPTModelImpl(GPTConfig{vocab_size, context_length, emb_dim, n_heads, n_layers, drop_rate, qkv_bias})
@@ -159,18 +227,18 @@ namespace llm_fs::model {
             }
             ++batch_idx;
 
-            if (global_step >= eval_iter && global_step % eval_freq == 0 && epoch > 0) {
-                auto [train_loss, val_loss] = this->evaluateModel(*train_loader, *val_loader, device, eval_iter);
-                train_losses.push_back(train_loss);
-                val_losses.push_back(val_loss);
-                track_tokens_seen.push_back(tokens_seen);
-                if (verbose) {
-                    std::cout << "\nEp " << (epoch + 1)
-                            << " (Step " << global_step << "): "
-                            << "Train loss " << std::fixed << std::setprecision(3) << train_loss
-                            << ", Val loss " << val_loss << std::endl;
-                }
-            }
+            // if (global_step >= eval_iter && global_step % eval_freq == 0 && epoch > 0) {
+            //     auto [train_loss, val_loss] = this->evaluateModel(*train_loader, *val_loader, device, eval_iter);
+            //     train_losses.push_back(train_loss);
+            //     val_losses.push_back(val_loss);
+            //     track_tokens_seen.push_back(tokens_seen);
+            //     if (verbose) {
+            //         std::cout << "\nEp " << (epoch + 1)
+            //                 << " (Step " << global_step << "): "
+            //                 << "Train loss " << std::fixed << std::setprecision(3) << train_loss
+            //                 << ", Val loss " << val_loss << std::endl;
+            //     }
+            // }
         }
         if (verbose) {
             std::cout << std::endl;

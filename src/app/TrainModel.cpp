@@ -31,8 +31,8 @@ int main() {
 
     model->trainModel(
         optimizer,
-        "../../data/openwebtext-10k-train-small.txt",
-        "../../data/openwebtext-10k-test-small.txt",
+        "../../data/openwebtext-10k-train.txt",
+        "../../data/openwebtext-10k-test.txt",
         tokenizer, device,
         256, 128, 16, 5, 50, 10
     );
